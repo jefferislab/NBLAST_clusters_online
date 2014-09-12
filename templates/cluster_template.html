@@ -1,0 +1,131 @@
+<%
+fc_neuronidurl <- function(fcid) {
+  # convert any valid flycircuit identifier into an idid
+  idids <- fc_idid(fcid)
+  sprintf("http://flycircuit.tw/modules.php?name=clearpage&op=detail_table&idid=%d",idids)
+}
+addhref<-function(x){
+  x=gsub("%A1","<a href='",x)
+  x=gsub("%A2","'>",x)
+  x=gsub("%A3","</a>",x)
+  x
+}
+href_url <- function(text, urls, trailing_slash=FALSE) {
+  if(missing(urls) && ncol(text)==2) {
+    urls <- text[,2]
+    text <- text[,1]
+  }
+  if(trailing_slash) paste("%A1", urls, "/%A2", text, "%A3", sep='')
+  else paste("%A1", urls, "%A2", text, "%A3", sep='')
+}
+-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Affinity propagation clustering of Drosophila melanogaster neurons</i></title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap theme -->
+  <link href="../../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+<body role="document" onLoad="webGLStart();">
+
+<!-- Fixed navbar -->
+<div class="navbar navbar-default navbar-static-top" role="navigation">
+  <div class="container">
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="../../">Home</a></li>
+        <li><a href="../../about.html">About</a></li>
+        <li><a href="../../contact.html">Contact</a></li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div>
+</div>
+
+
+
+<div class="container" role="main">
+
+<div class="page-header">
+  <h1>Cluster <%=cluster%></h1>
+  <h2>Part of supercluster <a href="../../superclusters/<%=supercluster_num%>"><%=as.character(as.roman(supercluster_num))%></a></h2>
+</div>
+
+<div class="row text-center">
+    <%=cluster_view%>
+</div>
+
+<div class="row row-xs-height">
+  <div class="col-xs-6 col-xs-height">
+    <h2>About</h2>
+    <p>Scores are NBLAST (version 2) similarity scores between each neuron and the exemplar (<%=exemplar_neuron%>), normalised to the self-score of the exemplar. The higher the better! Scores > 0 indicate a match of some sort. Excellent matches will have scores > 0.5.</p>
+
+    <p>Do you recognise any of the neurons in this cluster? <%=sprintf('<a href="mailto:%s?subject=fc/clusterv/%d:%s">Email us!</a>', 'virtualflybrain@gmail.com', cluster_version, cluster)%></p>
+
+    <h2>Credits</h2>
+    <p>Raw data provided by <a href='http://flycircuit.tw'>flycircuit.tw</a> as described in <a href='http://dx.doi.org/10.1016/j.cub.2010.11.056'>Three-Dimensional Reconstruction of Brain-wide Wiring Networks in Drosophila at Single-Cell Resolution</a> by Ann-Shyn Chiang et al.</p>
+
+    <p>Image processing carried out with <a href="http://teem.sourceforge.net/unrrdu/index.html">unu</a>, <a href="http://www.nitrc.org/projects/cmtk/">CMTK</a>, and <a href="http://fiji.sc">Fiji</a>.</p>
+
+    <p>Further processing carried out in <a href='http://www.r-project.org/'>R</a> with <a href="https://github.com/jefferis/nat">nat</a>. Clustering used package <a href='http://cran.r-project.org/web/packages/apcluster/'>apcluster</a>. 3D visualisation written from <a href='http://cran.r-project.org/web/packages/rgl/'>rgl</a> by writeWebGL.</p>
+  </div>
+
+  <div class="col-xs-6 col-xs-height">
+    <h2>Similar clusters</h2>
+    <p>The most similar clusters to this one are:<br /><br />
+    <%xdf <- transform(similar_exemplars_df,
+                       cluster=href_url(cluster, paste0("../", cluster), trailing_slash=TRUE),
+                       exemplar=href_url(exemplar, fc_neuronidurl(exemplar)),
+                       supercluster=href_url(as.character(as.roman(supercluster)), paste0("../../superclusters/", supercluster), trailing_slash=TRUE))%>
+    <%colnames(xdf) <- c('Cluster', 'Exemplar', 'Supercluster', 'Exemplar normalised score')%>
+    <%=addhref(print(xtable(xdf[-1, ], align=c("r", "l", "l", "l", "l")), 'html', print.results=F, include.rownames=F, html.table.attributes='class="table"'))%>
+    </p>
+  </div>
+
+</div>
+
+
+<div class="row row-xs-height">
+  <div class="col-xs-12 col-xs-height">
+    <h2>Cluster composition</h2>
+    <p>This cluster has <%=length(others) +1 %> neurons. The exemplar of this cluster (<%=exemplar_neuron%>) is drawn in black.<br /><br />
+    <%neurons=c(exemplar,others)%>
+    <%df=neuron[neurons,c("Name", "idid", "gene_name", "Driver","Gender")]%>
+    <%df$idid=as.integer(df$idid)%>
+    <%df$Name=href_url(df$Name,fc_neuronidurl(df$idid))%>
+    <%df$norm=fc_nblast(exemplar,c(exemplar,others), scoremat=allbyallmem)%>
+    <%df$norm_score=fc_nblast(exemplar,c(exemplar,others), scoremat=allbyallmem, normalisation="mean")%>
+    <%colnames(df) <- c('Neuron', 'idid', 'Gene name', 'Driver', 'Sex', 'Raw score', 'Normalised score')%>
+    <%=addhref(print(xtable(df, align=c("r", "l", "l", "l", "l", "l", "l", "l")),'html',print.results=F, include.rownames=F, html.table.attributes='class="table"'))%>
+    </p>
+  </div>
+</div>
+
+
+</div> <!-- /container -->
+
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="../../bootstrap/js/bootstrap.min.js"></script>
+
+</body>
+</html>
