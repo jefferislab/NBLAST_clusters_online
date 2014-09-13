@@ -46,8 +46,7 @@ dps <- read.neuronlistfh("http://flybrain.mrc-lmb.cam.ac.uk/si/nblast/flycircuit
 dps <- read.neurons(dps)
 
 # Attach the all-by-all score matrix and load into memory
-# allbyall <- fc_attach_bigmat("allbyallblastcanon_f9dc90ce5b2ffb74af37db1e3a2cb35b")
-allbyall <- fc_attach_bigmat("allbyallblastcv4.5")
+allbyall <- fc_attach_bigmat("allbyallblastcanon_f9dc90ce5b2ffb74af37db1e3a2cb35b")
 allbyallmem <- allbyall[, ]
 
 # Cluster all the exemplars
