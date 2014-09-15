@@ -20,7 +20,7 @@ for(cluster in valid_clusters) {
   similar_exemplars <- names(which(exemplar_scores > threshold))
   similar_exemplar_neurons <- fc_neuron(similar_exemplars)
   similar_exemplar_superclusters <- sapply(similar_exemplars, function(x) which(sapply(exemplars_by_supercluster, function(y) x %in% y)))
-  similar_cluster_ids <- match(similar_exemplars, exemplars)
+  similar_cluster_ids <- sapply(similar_exemplars, function(x) apresdf$cluster[which(apresdf$exemplar == x)[1]])
   # Build a data frame for xtable to display in the brewed document
   similar_exemplars_df <- data.frame(cluster=similar_cluster_ids, exemplar=similar_exemplar_neurons, supercluster=similar_exemplar_superclusters, norm_score=exemplar_scores[similar_exemplars])
 
