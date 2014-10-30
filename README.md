@@ -1,6 +1,6 @@
 # NBLAST clusters online
 
-### Now live at [jefferislab.org/si/nblast/clusters/](http://jefferislab.org/si/nblast/clusters)!
+### Now live at [jefferislab.org/si/nblast/clusters](http://jefferislab.org/si/nblast/clusters)!
 
 This repository contains scripts and supporting files for building interactive webpages showing the clustering of neurons in [Costa et al. (2014) NBLAST: Rapid, sensitive comparison of neuronal structure and construction of neuron family databases](http://dx.doi.org/10.1101/006346).
 
